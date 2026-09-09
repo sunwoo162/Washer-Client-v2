@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { MachineItem } from "@/entities/machine";
 import { usePostProxyReservation } from "@/entities/reservation";
-import { getUsers, type ManagedUserItem } from "@/entities/user";
+import { getUsers } from "@/entities/user";
 import { userQueryKeys } from "@/shared/api";
 import { STALE_TIME } from "@/shared/constants/queryOptions";
 import { useOutsideClick } from "@/shared/hooks/useOutsideClick";
@@ -64,20 +64,11 @@ export default function CreateProxyReservationModal({
             return getUsers(params);
           }
 
-          const floorUsers: ManagedUserItem[] = [];
-
-          for (let page = 0; ; page += 1) {
-            const pageUsers = await getUsers({
-              ...params,
-              page,
-              size: PROXY_RESERVATION_USER_PAGE_SIZE,
-            });
-            floorUsers.push(...pageUsers);
-
-            if (pageUsers.length < PROXY_RESERVATION_USER_PAGE_SIZE) {
-              return floorUsers;
-            }
-          }
+          return getUsers({
+            ...params,
+            page: 0,
+            size: 1000,
+          });
         }),
       );
 
