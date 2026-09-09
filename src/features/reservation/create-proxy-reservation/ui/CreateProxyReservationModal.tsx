@@ -44,8 +44,10 @@ export default function CreateProxyReservationModal({
   );
   const {
     data: users = [],
+    isFetching,
     isLoading,
     isError,
+    isPlaceholderData,
   } = useQuery({
     staleTime: STALE_TIME.USER,
     queryKey: [
@@ -87,6 +89,8 @@ export default function CreateProxyReservationModal({
     usePostProxyReservation();
 
   const selectedUser = users.find((user) => user.id === selectedUserId);
+  const isSearchSettled =
+    search === debouncedSearch && !isFetching && !isPlaceholderData;
   const machineTypeLabel = machine.type === "WASHER" ? "세탁기" : "건조기";
 
   const handleSearchChange = (value: string) => {
@@ -95,7 +99,7 @@ export default function CreateProxyReservationModal({
   };
 
   const handleSubmit = () => {
-    if (!selectedUser || isPending) return;
+    if (!selectedUser || isPending || !isSearchSettled) return;
 
     createProxyReservation(
       { userId: selectedUser.id, machineId: machine.id },
@@ -194,8 +198,10 @@ export default function CreateProxyReservationModal({
                     <button
                       key={user.id}
                       type="button"
-                      onClick={() => setSelectedUserId(user.id)}
-                      disabled={isPending}
+                      onClick={() => {
+                        if (isSearchSettled) setSelectedUserId(user.id);
+                      }}
+                      disabled={isPending || !isSearchSettled}
                       aria-pressed={isSelected}
                       className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         isSelected
@@ -239,7 +245,7 @@ export default function CreateProxyReservationModal({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!selectedUser || isPending}
+            disabled={!selectedUser || isPending || !isSearchSettled}
             className="flex h-11 flex-1 items-center justify-center rounded-xl bg-[#4D83F6] font-semibold text-white transition hover:bg-[#3E72DC] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "예약 생성 중..." : "대리 예약"}
