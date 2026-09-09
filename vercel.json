@@ -1,0 +1,7 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "feat/admin-proxy-reservation": false
+    }
+  }
+}
